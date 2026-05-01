@@ -48,8 +48,10 @@ function sendRestart() {
 }
 
 document.getElementById("restartBtn").addEventListener("click", function() {
-    window.location.reload();
-    sendRestart();
+    if (confirm("האם ברצונכם להתחיל את המשחק מחדש? פעולה זאת תאתכל את ניקוד כל הקבוצות")) {
+        window.location.reload();
+        sendRestart();
+    }
 });
 
 const board = document.getElementById('boardStation');
