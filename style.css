@@ -178,7 +178,7 @@ body {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    gap: 18px;
+    gap: 8px;
 }
 
 .timerTxtBCont {
@@ -191,11 +191,15 @@ body {
 .timerTxtT,
 .timerTxtB,
 .teamTxt {
-    font-size: 1.8em;
+    font-size: 1.4em;
+}
+
+.timerTxtB {
+    margin-bottom: 3px;
 }
 
 #timerTxt {
-    font-size: 4.8em;
+    font-size: 4em;
     height: 40px;
     display: flex;
     align-items: center;
@@ -204,8 +208,9 @@ body {
 
 #teamCircle {
     position: relative;
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
+    margin-block: 4px;
     flex-shrink: 0;
     border-radius: 50%;
     border: 2px solid #fff;
