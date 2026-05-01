@@ -147,6 +147,7 @@ body {
 .controller-body {
     /* background: radial-gradient(circle,rgba(235, 21, 21, 1) 0%, rgba(145, 22, 28, 1) 100%); */
     background-color: #e3e3e3;
+    height: 100svh;
 }
 
 .topSec {

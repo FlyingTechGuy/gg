@@ -178,7 +178,7 @@ function getNextCardInd() {
     return cardsInd.pop();
 }
 
-let teamTime = 10;
+let teamTime = 60;
 let currentTeam = 1;
 let teamsScore = [1,1,1,1];
 let curNumberInd = 1;
@@ -262,7 +262,7 @@ function endRound() {
     document.getElementById("regButtonsBox").classList.add("hide");
     document.getElementById("mulButtonsBox").classList.add("show");
     document.getElementById("startSec").classList.add("show");
-    teamTime = 10;
+    teamTime = 60;
     document.getElementById("timerTxt").innerHTML = teamTime;
     currentTeam += 1;
     if (currentTeam >= 5) {currentTeam = 1};
