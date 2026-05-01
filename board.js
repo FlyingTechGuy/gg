@@ -48,7 +48,7 @@ function sendRestart() {
 }
 
 document.getElementById("restartBtn").addEventListener("click", function() {
-    if (confirm("האם ברצונכם להתחיל את המשחק מחדש? פעולה זאת תאתכל את ניקוד כל הקבוצות")) {
+    if (confirm("האם ברצונכם להתחיל את המשחק מחדש? פעולה זאת תאתחל את ניקוד כל הקבוצות")) {
         window.location.reload();
         sendRestart();
     }
