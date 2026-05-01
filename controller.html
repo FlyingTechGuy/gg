@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/ceab6117ab.js" crossorigin="anonymous"></script>
+    <title>Guess Game - Controller</title>
+</head>
+<body class="controller-body">
+    <section class="topSec">
+      <div class="timerBox">
+        <p class="timerTxtT">הזמן שנותר:</p>
+        <div class="timerTxtBCont">
+          <p id="timerTxt">60</p>
+          <p class="timerTxtB">שניות</p>
+        </div>
+      </div>
+      <div class="scoreBox">
+        <p class="teamTxt">תור קבוצה:</p>
+        <sapn id="teamCircle"></span>
+      </div>
+    </section>
+    <section class="midSec">
+      <div class="cardBox">
+        <p id="cardTxt">קרן יער</p>
+      </div>
+    </section>
+    <section class="bottomSec">
+      <div class="regButtonsBox" id="regButtonsBox">
+        <button class="regBottomBtn" id="rightBtn"><i class="fa-solid fa-circle-check"></i><span>צדקנו</span></button>
+        <button class="regBottomBtn" id="wrongBtn"><i class="fa-solid fa-circle-xmark"></i><span>דילגנו</span></button>
+      </div>
+      <div class="mulButtonsBox" id="mulButtonsBox">
+        <button class="mulBottomBtn" id="redBtn"></i><span>אדום</span></button>
+        <button class="mulBottomBtn" id="greenBtn"></i><span>ירוק</span></button>
+        <button class="mulBottomBtn" id="blueBtn"></i><span>כחול</span></button>
+        <button class="mulBottomBtn" id="orangeBtn"></i><span>כתום</span></button>
+        <button class="mulBottomBtnWrong" id="wrongBtnMul"><i class="fa-solid fa-circle-xmark"></i></button>
+      </div>
+    </section>
+    <section class="startSec show" id="startSec">
+      <div class="startBox">
+        <div class="startBoxBottom">
+          <p class="startTitle">לחצו על ״התחל״ על מנת להתחיל את הסיבוב הנוכחי</p>
+          <button id="startBtn">התחל</button>
+        </div>
+      </div>
+    </section>
+    <script type="module" src="controller.js"></script>
+</body>
+</html>

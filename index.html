@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <title>Guess Game - Board</title>
+</head>
+<body class="board-body">
+    <div class="scene">
+      <div class="board-container" id="board">
+          <!-- <div class="logo">ALIAS</div> -->
+          <div class="board-station" id="boardStation">
+            <svg id="path-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
+          </div>
+          <div id="player-red" class="player-piece"></div>
+          <div id="player-blue" class="player-piece"></div>
+          <div id="player-green" class="player-piece"></div>
+          <div id="player-orange" class="player-piece"></div>
+      </div>
+      <div id="restartBtn">התחל מחדש</div>
+    </div>
+    <script type="module" src="board.js"></script>
+</body>
+</html>

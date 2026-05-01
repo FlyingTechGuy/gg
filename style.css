@@ -1,0 +1,444 @@
+@font-face {
+    font-family: "ggFont";
+    src: url(src/nehama-webfont.ttf);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    outline: 0;
+    border: 0;
+}
+
+body {
+    position: relative;
+    background-color: #020202;
+    color: white; 
+    min-height: 100svh;
+    min-width: 100vw;
+    /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+    /* font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; */
+    font-family: 'ggFont';
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    overflow: hidden; /* מונע גלילה מיותרת באייפד */
+    direction: rtl;
+}
+
+/* -=- Board -=- */
+.board-body {
+    background: radial-gradient(circle,rgb(30, 30, 30) 0%, rgba(0, 0, 0, 1) 100%);
+}
+
+.scene {
+    perspective: 1000px; /* קובע כמה ה"מצלמה" רחוקה מהלוח */
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.board-container {
+    position: relative;
+    background-color: #e60719; /* הצבע האדום מהתמונה */
+    border-radius: 30px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.2);
+    padding: 40px;
+    border: 10px solid #9a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /*transform: rotateX(45deg);  כאן קורה הקסם! */
+    transform-style: preserve-3d; /* דואג שהחיילים לא ייראו שטוחים כמו נייר */
+    box-shadow: 0 50px 100px rgba(0,0,0,0.5); /* צל עמוק שנותן תחושת גובה */
+}
+
+.board-station {
+    width: 760px;
+    height: 560px;
+}
+
+.station { 
+    position: absolute; 
+    width: 60px; 
+    height: 60px; 
+    background-color: white; 
+    color: #e60719; /* d63031 */
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+    font-size: 48px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+    transition: transform 0.3s;
+}
+
+.stationInvert {
+    background-color: #e60719;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.08), inset 0px 0px 0px 3px white;
+}
+
+#main-path {
+    fill: none;
+    stroke: white; /* צבע הקו */
+    stroke-width: 4; /* עובי הקו */
+    stroke-dasharray: 10, 10; /* הופך את הקו למקווקו: 10 פיקסלים קו, 10 רווח */
+    opacity: 0.6; /* שקיפות כדי שלא יגנוב את ההצגה מהמספרים */
+    stroke-linecap: round;
+}
+
+#restartBtn {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
+    background-color: #e31919;
+    border: 4px solid #9a0a0a;
+    font-family: "ggFont";
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+/* עיצוב החיילים */
+.player-piece { 
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    
+    /* אנימציית תנועה חלקה */
+    transition: all 0.8s; /* cubic-bezier(0.175, 0.885, 0.32, 1.175) */
+    z-index: 10;
+
+    /* מסגרת לבנה עדינה בחלק העליון */
+    border: 2px solid rgb(255, 255, 255);
+    /* box-shadow: 0px 4px 0 0 #e7e7e7, 0 15px 20px rgba(0,0,0,0.8); */
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    box-sizing: border-box;
+}
+
+#player-red { background-color: #e31919; }
+#player-blue { background-color: #1616d2; }
+#player-green { background-color: #099d09; }
+#player-orange { background-color: #efa206; }
+
+.logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 80px;
+    font-weight: 900;
+    opacity: 0.2;
+    letter-spacing: 5px;
+    pointer-events: none;
+}
+
+/* -=- Controller -=- */
+.controller-body {
+    /* background: radial-gradient(circle,rgba(235, 21, 21, 1) 0%, rgba(145, 22, 28, 1) 100%); */
+    background-color: #e3e3e3;
+}
+
+.topSec {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: calc(100% - 40px);
+    height: calc(20vh - 40px);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-direction: row;
+    gap: 20px;
+    color: #4f4f4f;
+}
+
+.timerBox,
+.scoreBox {
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.08);
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.timerTxtBCont {
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    gap: 8px;
+}
+
+.timerTxtT,
+.timerTxtB,
+.teamTxt {
+    font-size: 1.8em;
+}
+
+#timerTxt {
+    font-size: 4.8em;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#teamCircle {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+    background-color: #e31919;
+    transition: 0.3s;
+}
+
+.midSec {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: calc(100% - 40px);
+    height: calc(45vh - 00px);
+    padding: 20px;
+    padding-block: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 30px;
+    color: #4f4f4f;
+}
+
+.cardBox {
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.08);
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+}
+
+#cardTxt {
+    font-size: 15cqi;
+    margin: 0;
+    white-space: nowrap;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.bottomSec {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: calc(100% - 40px);
+    height: calc(35vh - 40px);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 30px;
+    color: #4f4f4f;
+}
+
+.regButtonsBox {
+    position: relative;
+    width: calc(100% - 0px);
+    height: calc(100% - 8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.08);
+    background-color: #fff;
+    border: 4px solid #fff;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.regButtonsBox.hide {
+    display: none;
+}
+
+.regBottomBtn {
+    position: relative;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 3.2em;
+    font-family: 'ggFont';
+    color: #fff;
+    cursor: pointer;
+}
+
+#rightBtn {
+    background-color: #099d09;
+}
+
+#wrongBtn {
+    background-color: #e31919;
+}
+
+.mulButtonsBox {
+    position: relative;
+    width: calc(100% - 0px);
+    height: calc(100% - 8px);
+    display: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.04);
+    background-color: #fff;
+    border: 4px solid #fff;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.mulButtonsBox.show {
+    display: grid;
+}
+
+.mulBottomBtn {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 3.2em;
+    font-family: 'ggFont';
+    color: #fff;
+    cursor: pointer;
+}
+
+#redBtn {
+    background-color: #e31919;
+}
+
+#greenBtn {
+    background-color: #099d09;
+}
+
+#orangeBtn {
+    background-color: #efa206;
+}
+
+#blueBtn {
+    background-color: #1616d2;
+}
+
+.mulBottomBtnWrong {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 75px;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4.2em;
+    background-color: #fff;
+    color: #e31919;
+    border: 2px solid #fff;
+    border-radius: 50%;
+}
+
+.startSec {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+    padding: 20px;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    text-align: center;
+    gap: 30px;
+    color: #4f4f4f;
+    z-index: 1001;
+    transition: 0.3s;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.startSec.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.startBox {
+    position: relative;
+    background-color: #fff;
+    border-radius: 20px;
+    width: calc(100% - 40px);
+    height: calc(80vh - 60px);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.startBoxBottom {
+    position: relative;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.startTitle {
+    position: relative;
+    font-size: 2.4em;
+    margin-top: 10px;
+}
+
+#startBtn {
+    padding-top: 30px;
+    padding-bottom: 22px;
+    width: 100%;
+    font-size: 2.8em;
+    font-family: "ggFont";
+    background-color: #e31919;
+    color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.08);
+}
