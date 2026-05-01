@@ -155,7 +155,7 @@ body {
     top: 0;
     left: 0;
     width: calc(100% - 40px);
-    height: calc(20vh - 40px);
+    height: calc(20svh - 40px);
     padding: 20px;
     display: flex;
     align-items: center;
@@ -218,7 +218,7 @@ body {
     top: 0;
     left: 0;
     width: calc(100% - 40px);
-    height: calc(45vh - 00px);
+    height: calc(45svh - 00px);
     padding: 20px;
     padding-block: 0;
     display: flex;
@@ -256,7 +256,7 @@ body {
     top: 0;
     left: 0;
     width: calc(100% - 40px);
-    height: calc(35vh - 40px);
+    height: calc(35svh - 40px);
     padding: 20px;
     display: flex;
     align-items: center;
@@ -403,7 +403,7 @@ body {
     background-color: #fff;
     border-radius: 20px;
     width: calc(100% - 40px);
-    height: calc(80vh - 60px);
+    height: calc(80svh - 60px);
     padding: 20px;
     display: flex;
     align-items: center;
