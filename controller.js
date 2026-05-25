@@ -50,6 +50,41 @@ window.addEventListener("DOMContentLoaded", async () => {
         console.log("שגיאה בתקשורת עם השרת. נסה שוב.");
         document.getElementById("roomErrSecFull").classList.remove("hide");
     }
+
+    if (roomRef != '') {
+        onValue(roomRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.restart !== undefined && data.restart != false) {
+                window.location.reload();
+                update(roomRef, {
+                    restart: false
+                });
+            }
+        });
+
+        let groupNum = 0;
+        onValue(roomRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.groups !== undefined && data.groups !== 0) {
+                document.getElementById("startSecFull").classList.add("hide");
+                groupNum = data.groups;
+                update(roomRef, {
+                    groups: 0
+                });
+                switch (groupNum) {
+                    case 2:
+                        document.getElementById("orangeBtn").classList.add("disabled");
+                        document.getElementById("blueBtn").classList.add("disabled");
+                        break;
+                    case 3:
+                        document.getElementById("blueBtn").classList.add("disabled");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+    }
 });
 
   
@@ -72,41 +107,6 @@ function sendTeam(newTeam) {
         team: newTeam
     });
     console.log(newTeam);
-}
-
-if (roomRef != '') {
-    onValue(roomRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.restart !== undefined && data.restart != false) {
-            window.location.reload();
-            update(roomRef, {
-                restart: false
-            });
-        }
-    });
-
-    let groupNum = 0;
-    onValue(roomRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.groups !== undefined && data.groups !== 0) {
-            document.getElementById("startSecFull").classList.add("hide");
-            groupNum = data.groups;
-            update(roomRef, {
-                groups: 0
-            });
-            switch (groupNum) {
-                case 2:
-                    document.getElementById("orangeBtn").classList.add("disabled");
-                    document.getElementById("blueBtn").classList.add("disabled");
-                    break;
-                case 3:
-                    document.getElementById("blueBtn").classList.add("disabled");
-                    break;
-                default:
-                    break;
-            }
-        }
-    });
 }
 
 // document.getElementById("rightBtn").addEventListener("click", function() {

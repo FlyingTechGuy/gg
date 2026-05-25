@@ -86,8 +86,11 @@ function jsMes() {
 onValue(newRoomRef, (snapshot) => {
     const data = snapshot.val();
     if (data && data.status !== undefined && data.status !== "waiting") {
-       document.getElementById("qrCodeCont").classList.add("hide");
-       document.getElementById("startScreenCont").classList.remove("hide");
+        document.getElementById("qrCodeCont").classList.add("hide");
+        document.getElementById("startScreenCont").classList.remove("hide");
+        update(newRoomRef, {
+            status: "waiting"
+        });
     }
 });
 
