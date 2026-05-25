@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="src/ggLogo.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200..800&family=Fira+Code:wght@300..700&family=Gugi&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/ceab6117ab.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <title>Guess Game - Board</title>
+</head>
+<body class="board-body">
+    <div class="scene">
+      <div class="stripCont">
+        <div id="restartBtn"><i class="fa-solid fa-arrows-rotate"></i></div>
+        <div class="stripTxtBox">
+          <div class="lastWordTxt">מושג אחרון: <span id="lastWordTxt"></span></div>
+          <div class="topTimerTxt">הזמן שנותר: <span id="topTimerTxt">60</span> שניות</div>
+        </div>
+      </div>
+      <div class="board-container" id="board">
+        <!-- <div class="logo">ALIAS</div> -->
+        <div class="board-station" id="boardStation">
+          <svg id="path-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
+        </div>
+        <div id="player-red" class="player-piece"></div>
+        <div id="player-blue" class="player-piece"></div>
+        <div id="player-green" class="player-piece"></div>
+        <div id="player-orange" class="player-piece"></div>
+      </div>
+      <div class="winningMessageCont" id="winningMessageCont">
+        <div class="winningMessageBox">
+          <p class="winningMessageTitle"><span class="winningMessageTitleTop">כל הכבוד!</span><br>הקבוצה <span id="winningMessageColor"></span> ניצחה!</p>
+          <button id="winningMessageBtn">התחל מחדש</button>
+        </div>
+      </div>
+      <div class="startScreenCont hide" id="startScreenCont">
+        <div class="startScreenBox">
+          <p class="startScreenTitle">כמה קבוצות תרצו לשחק?</p>
+          <div class="startScreenBtnsBox">
+            <button class="startScreenBtn" id="startScreenBtn2">2 קבוצות</button>
+            <button class="startScreenBtn" id="startScreenBtn3">3 קבוצות</button>
+            <button class="startScreenBtn" id="startScreenBtn4">4 קבוצות</button>
+          </div>
+        </div>
+      </div>
+      <div class="qrCodeCont" id="qrCodeCont">
+        <div class="qrCodeBox">
+          <p class="qrCodeTitle">על מנת להתחיל לשחק אנא סרקו את קוד הקיואר<br>או כנסו לקישור מתחתיו במכשיר אחר</p>
+          <div class="qrCodeImgBox" id="qrCodeImgBox"></div>
+          <p class="qrCodeUrl" id="qrCodeUrl"></p>
+        </div>
+      </div>
+    </div>
+    <div id="snackbar-cs">הועתק ללוח</div>
+    <script type="module" src="board.js"></script>
+</body>
+</html>
