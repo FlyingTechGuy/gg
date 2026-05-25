@@ -28,15 +28,8 @@ const gameRef = ref(db, 'game_session');
 let newRoomRef = '', roomId = '', gameLink = '';
 
 function createRoom() {
-    // 1. יוצרים רפרנס לתיקיית המשחקים הכללית
-
-    // 2. משתמשים ב-push כדי לייצר חדר חדש עם מזהה ייחודי לחלוטין של פיירבייס
     newRoomRef = push(gameRef);
-    
-    // 3. חילוץ ה-ID הייחודי שפיירבייס יצר
     roomId = newRoomRef.key;
-
-    // 4. מאתחלים את המשתנים בתוך החדר החדש שנוצר
     update(newRoomRef, {
         col: "none",
         groups: 0,
@@ -56,12 +49,10 @@ function createRoom() {
 
     localStorage.setItem("~lastRoomID", roomId);
 
-    // הקישור שנוצר ישלח לחבר: https://mygame.com/?room=-NqJv8zXyW2...
-    gameLink = `${window.location.origin}/controller.html?room=${roomId}`; // http://127.0.0.1:5500/controller.html https://flyingtechguy.github.io/gg/controller.html ${window.location.pathname}
+    gameLink = `${window.location.origin}/gg/controller.html?room=${roomId}`; // http://127.0.0.1:5500/controller.html https://flyingtechguy.github.io/gg/controller.html ${window.location.pathname}
     // console.log("Controller Link: ", gameLink);
     // const cardsScreenLink = `${window.location.origin}/cards.html?room=${roomId}`;
 
-    // 5. יצירת קוד ה-QR והצגתו על המסך
     new QRCode(document.getElementById("qrCodeImgBox"), {
         text: gameLink,
         width: 256,
