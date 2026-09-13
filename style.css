@@ -45,16 +45,25 @@ body {
     gap: 20px;
 }
 
+.gameBox {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5px;
+}
+
 .board-container {
     position: relative;
     /*background-color: #e60719;  הצבע האדום מהתמונה */
     background: linear-gradient(135deg,rgba(176, 23, 23, 1) 0%, rgb(207, 14, 30) 100%) padding-box,
                 linear-gradient(135deg,rgb(108, 21, 21) 0%, rgb(152, 14, 26) 100%) border-box;
-    border-radius: 30px;
+    border-radius: 15px;
     box-shadow: 0 0 12px rgba(0,0,0,0.2);
     padding: 40px;
     /* border: 10px solid #9a0a0a; */
-    border: 10px solid transparent;
+    border: 5px solid transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -78,10 +87,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
     font-size: 48px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.04);
     transition: transform 0.3s;
+}
+
+.station span {
+    margin-top: 3px;
 }
 
 .stationInvert {
@@ -106,9 +118,9 @@ body {
     /* background: linear-gradient(-135deg,rgba(176, 23, 23, 1) 0%, rgb(207, 14, 30) 100%); */
     background: linear-gradient(135deg,rgba(176, 23, 23, 1) 0%, rgb(207, 14, 30) 100%) padding-box,
                 linear-gradient(135deg,rgb(108, 21, 21) 0%, rgb(152, 14, 26) 100%) border-box;
-    border-radius: 30px;
+    border-radius: 15px;
     /* border: 10px solid #9a0a0a; */
-    border: 10px solid transparent;
+    border: 5px solid transparent;
     width: 840px;
     display: flex;
     align-items: center;
@@ -119,7 +131,7 @@ body {
 #restartBtn {
     background-color: #fff;
     color: #e31919;
-    border-radius: 15px;
+    border-radius: 30px;
     margin: 10px;
     font-size: 1.5em;
     cursor: pointer;
@@ -148,7 +160,7 @@ body {
     font-size: 2em;
     cursor: pointer;
     margin-bottom: -5px;
-    margin-right: 5px;
+    /* margin-right: 5px; */
 }
 
 .topTimerTxt {
@@ -176,14 +188,14 @@ body {
     /* מסגרת לבנה עדינה בחלק העליון */
     border: 2px solid rgb(255, 255, 255);
     /* box-shadow: 0px 4px 0 0 #e7e7e7, 0 15px 20px rgba(0,0,0,0.8); */
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    /* box-shadow: 0 0 5px rgba(0,0,0,0.5); */
     box-sizing: border-box;
 }
 
-#player-red { background-color: #e31919; }
-#player-blue { background-color: #1616d2; }
-#player-green { background-color: #099d09; }
-#player-orange { background-color: #efa206; }
+#player-red { background-color: #e31919; box-shadow: 0 0 5px #e31919aa; }
+#player-blue { background-color: #1616d2; box-shadow: 0 0 5px #1616d2aa; }
+#player-green { background-color: #099d09; box-shadow: 0 0 5px #099d09aa; }
+#player-orange { background-color: #efa206; box-shadow: 0 0 5px #efa206aa; }
 
 .logo {
     position: absolute;
@@ -315,7 +327,14 @@ body {
 
 .startScreenBtn:hover {
     background-color: #c51919;
-    transform: scale(0.98) translateY(1px);
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.08), 0px 3px 0px #a71a1a;
+    transform: translateY(2px);
+}
+
+.startScreenBtn:active {
+    background-color: #c51919;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.08), 0px 0px 0px #a71a1a;
+    transform: translateY(5px);
 }
 
 .qrCodeCont {
@@ -362,9 +381,11 @@ body {
 .qrCodeUrl {
     color: #000;
     background-color: rgba(0,0,0,0.08);
-    font-family: "Gugi", sans-serif;
+    box-shadow: inset 0px 0px 3px rgba(0, 0, 0, 0.15);
+    /* font-family: "Gugi", sans-serif; */
+    font-size: 1.5em;
     padding: 10px 15px;
-    border-radius: 5px;
+    border-radius: 3px;
     text-align: center;
     cursor: pointer;
 }
@@ -372,7 +393,6 @@ body {
 #snackbar-cs {
   visibility: hidden; /* Hidden by default. Visible on click */
   min-width: 250px; /* Set a default minimum width */
-  margin-left: -125px; /* Divide value of min-width by 2 */
   background-color: #fff; /* Black background color */
   color: #000; /* White text color */
   text-align: center; /* Centered text */
@@ -381,6 +401,7 @@ body {
   position: fixed; /* Sit on top of the screen */
   z-index: 1000; /* Add a z-index if needed */
   left: 50%; /* Center the snackbar */
+  transform: translateX(-50%);
   bottom: 30px; /* 30px from the bottom */
   pointer-events: none;
   border-radius: 10px;
@@ -412,6 +433,18 @@ body {
 @keyframes fadeout {
   from {bottom: 30px; opacity: 1;}
   to {bottom: 0; opacity: 0;}
+}
+
+@media screen and (max-height: 850px) {
+    .gameBox {
+        transform: scale(0.8);
+    }
+}
+
+@media screen and (max-width: 925px) {
+    .gameBox {
+        transform: scale(0.8);
+    }
 }
 
 /* -=- Controller -=- */
@@ -485,7 +518,8 @@ body {
     flex-shrink: 0;
     border-radius: 50%;
     border: 2px solid #fff;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+    /* box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3); */
+    box-shadow: 0 0 5px #e31919aa;
     background-color: #e31919;
     transition: 0.3s;
 }

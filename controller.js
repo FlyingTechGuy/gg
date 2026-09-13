@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-import { getDatabase, ref, get, onValue, update } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+import { getDatabase, ref, get, set, onValue, update, onDisconnect } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -19,10 +19,31 @@ const firebaseConfig = {
   measurementId: "G-XVHJQ0ZR3M"
 };
 
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getDatabase(app);
+
+const gameRef = ref(db, 'game_session');
 
 let currentRoomId = null;
 let roomId = '', roomRef = '';
 
+async function deleteRoom(roomIdX) {
+    if (!roomIdX) {
+        console.error("שגיאה: ניסיון למחוק חדר אך ה-roomIdX ריק!");
+        return;
+    }
+    const roomRefD = ref(db, `game_session/${roomIdX}`);
+    try {
+        await remove(roomRefD);
+        console.log(`החדר ${roomIdX} נמחק בהצלחה מ-Firebase!`);
+    } catch (error) {
+        console.error("שגיאה במחיקת החדר:", error);
+    }
+}
+
+let groupNum = 0;
 window.addEventListener("DOMContentLoaded", async () => {
     const urlParams = new URLSearchParams(window.location.search);
     roomId = urlParams.get('room');
@@ -38,9 +59,39 @@ window.addEventListener("DOMContentLoaded", async () => {
             currentRoomId = roomId;
             console.log("התחברת בהצלחה לחדר הפעיל:", roomId);
             document.getElementById("roomErrSecFull").classList.add("hide");
+            // const deviceStatusRef = ref(db, `game_session/${roomId}/status`);
+            // set(deviceStatusRef, "Connected").then(() => {
+            //     console.log("מנגנות התנתקות הופעל");
+            //     onDisconnect(deviceStatusRef).set("disconnected");
+            // }).catch((error) => {
+            //     console.error("שגיאה בעדכון החיבור:", error);
+            // });
             update(roomRef, {
                 status: "Connected"
             });
+            console.log("מנגנות התנתקות הופעל");
+            onDisconnect(roomRef).update({
+                status: "Disconnected"
+            });
+            const data = snapshot.val();
+            if (data && data.score1 !== undefined && data.score2 !== undefined && data.score3 !== undefined && data.score4 !== undefined) {
+                teamsScore[0] = data.score1;
+                teamsScore[1] = data.score2;
+                teamsScore[2] = data.score3;
+                teamsScore[3] = data.score4;
+                console.log("scores updated");
+            }
+            if (data && data.cur !== undefined) {
+                curWord = data.cur;
+            }
+            if (data && data.curTime !== undefined) {
+                teamTime = data.curTime;
+                document.getElementById("timerTxt").innerHTML = teamTime.toString().padStart(2, '0');
+            }
+            if (data && data.team !== undefined) {
+                currentTeam = txtToTeam(data.team);
+                updateTeamColor();
+            }
         } else {
             console.log("אופס! החדר הזה אינו קיים או שהמשחק כבר הסתיים על ידי הלוח הראשי.");
             document.getElementById("roomErrSecFull").classList.remove("hide");
@@ -55,22 +106,17 @@ window.addEventListener("DOMContentLoaded", async () => {
         onValue(roomRef, (snapshot) => {
             const data = snapshot.val();
             if (data && data.restart !== undefined && data.restart != false) {
+                // update(roomRef, {
+                //     restart: false
+                // });
                 window.location.reload();
-                update(roomRef, {
-                    restart: false
-                });
             }
-        });
-
-        let groupNum = 0;
-        onValue(roomRef, (snapshot) => {
-            const data = snapshot.val();
             if (data && data.groups !== undefined && data.groups !== 0) {
                 document.getElementById("startSecFull").classList.add("hide");
                 groupNum = data.groups;
-                update(roomRef, {
-                    groups: 0
-                });
+                // update(roomRef, {
+                //     groups: 0
+                // });
                 switch (groupNum) {
                     case 2:
                         document.getElementById("orangeBtn").classList.add("disabled");
@@ -83,23 +129,82 @@ window.addEventListener("DOMContentLoaded", async () => {
                         break;
                 }
             }
+            if (!data) {
+                window.location.replace(window.location.origin + window.location.pathname);
+            }
         });
+
+        // onDisconnect(roomRef).update({
+        //     status: "discon"
+        // }).catch((err) => {
+        //     console.error("שגיאה בהגדרת onDisconnect:", err);
+        // });
     }
 });
 
-  
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getDatabase(app);
+function teamToTxt(cInd) {
+    switch (cInd) {
+        case 1:
+            return "player-red"
+        case 2:
+            return "player-green"
+        case 3:
+            return "player-orange"
+        case 4:
+            return "player-blue"
+        default:
+            console.log("Error Sending Score");
+            break;
+    }
+}
 
-const gameRef = ref(db, 'game_session');
+function txtToTeam(cInd) {
+    switch (cInd) {
+        case "player-red":
+            return 1
+        case "player-green":
+            return 2
+        case "player-orange":
+            return 3
+        case "player-blue":
+            return 4
+        default:
+            console.log("Error Sending Score");
+            break;
+    }
+}
 
-function sendScore(newScore) {
-    update(roomRef, {
-        score: newScore
-    });
+function sendScore(newScore, curTeam) {
+    switch (curTeam) {
+        case "player-red":
+            update(roomRef, {
+                score1: newScore
+            });
+            break;
+        case "player-green":
+            update(roomRef, {
+                score2: newScore
+            });
+            break;
+        case "player-orange":
+            update(roomRef, {
+                score3: newScore
+            });
+            break;
+        case "player-blue":
+            update(roomRef, {
+                score4: newScore
+            });
+            break;
+        default:
+            console.log("Error Sending Score");
+            break;
+    }
+    // update(roomRef, {
+    //     score: newScore
+    // });
     console.log(newScore);
+    console.log(curTeam);
 }
 
 function sendTeam(newTeam) {
@@ -108,6 +213,22 @@ function sendTeam(newTeam) {
     });
     console.log(newTeam);
 }
+
+const cardTxt = document.getElementById("cardTxt");
+const changeFontSize = () => {
+    const charCount = cardTxt.innerHTML.length;
+
+    let newSize = 100 / (charCount * 0.5);
+
+    if (newSize > 20) newSize = 20;
+    if (newSize < 5) newSize = 5;
+
+    cardTxt.style.fontSize = `${newSize}cqi`;
+};
+
+cardTxt.addEventListener("input", changeFontSize);
+window.addEventListener("resize", changeFontSize);
+changeFontSize();
 
 // document.getElementById("rightBtn").addEventListener("click", function() {
 //   sendScore(9)
@@ -329,17 +450,17 @@ function cardsShuffle() {
 }
 cardsShuffle();
 
-let lastWord = "";
+let curWord = "";
 function getNextCardInd() {
     update(roomRef, {
-        last: lastWord
+        last: curWord
     });
     if (cardsInd.length === 0) {
         cardsInd = Array.from({length: cardsList.length}, (_, i) => i);
         cardsShuffle();
     }
     let lastCardInd = cardsInd.pop();
-    lastWord = cardsList[lastCardInd][(curNumberInd-1)%8];
+    curWord = cardsList[lastCardInd][(curNumberInd-1)%8];
     return lastCardInd;
 }
 
@@ -348,9 +469,35 @@ let currentTeam = 1;
 let teamsScore = [1,1,1,1];
 let curNumberInd = 1;
 
+async function onPageLoad() {
+    try {
+      const snapshot = await get(roomRef);
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        if (data && data.score1 !== undefined && data.score2 !== undefined && data.score3 !== undefined && data.score4 !== undefined) {
+            teamsScore[0] = data.score1;
+            teamsScore[1] = data.score2;
+            teamsScore[2] = data.score3;
+            teamsScore[3] = data.score4;
+            console.log("updated");
+        }
+      } else {
+        console.log("No data available");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+}
+
 function startRound() {
     curNumberInd = teamsScore[currentTeam-1];
-    document.getElementById("cardTxt").innerHTML = cardsList[getNextCardInd()][(curNumberInd-1)%8];
+    if (curWord == "") {
+        curWord = cardsList[getNextCardInd()][(curNumberInd-1)%8];
+        update(roomRef, {
+            cur: curWord
+        });
+    }
+    document.getElementById("cardTxt").innerHTML = curWord;
     changeFontSize();
     if (teamsScore[currentTeam-1] != 10 && teamsScore[currentTeam-1] != 21 && teamsScore[currentTeam-1] != 32 && teamsScore[currentTeam-1] != 43) {
         document.getElementById("regButtonsBox").classList.remove("hide");
@@ -380,21 +527,25 @@ function startTimer() {
             document.getElementById("mulButtonsBox").classList.add("show");
             // setTimeout(() => {}, 2000);
         }
+        update(roomRef, {
+            curTime: teamTime
+        });
         document.getElementById("timerTxt").innerHTML = teamTime.toString().padStart(2, '0');
     }, 1000);
 }
 
 function moveTeam(newCurTeam) {
     teamsScore[newCurTeam-1]+=1;
-    sendTeam(taemToTxt(newCurTeam));
-    sendScore(teamsScore[newCurTeam-1]);
+    sendTeam(teamToTxt(newCurTeam));
+    sendScore(teamsScore[newCurTeam-1], teamToTxt(newCurTeam));
     if (teamTime == 0) {
         endRound();
-        update(roomRef, {
-            last: lastWord
-        });
     } else {
-        document.getElementById("cardTxt").innerHTML = cardsList[getNextCardInd()][(curNumberInd-1)%8];
+        curWord = cardsList[getNextCardInd()][(curNumberInd-1)%8];
+        update(roomRef, {
+            cur: curWord
+        });
+        document.getElementById("cardTxt").innerHTML = curWord;
         changeFontSize();
     }
 }
@@ -417,15 +568,16 @@ document.getElementById("wrongBtnMul").addEventListener("click", function() {
     if (teamsScore[currentTeam-1] < 1) {
         teamsScore[currentTeam-1] = 1;
     }
-    sendTeam(taemToTxt(currentTeam));
-    sendScore(teamsScore[currentTeam-1]);
+    sendTeam(teamToTxt(currentTeam));
+    sendScore(teamsScore[currentTeam-1], teamToTxt(currentTeam));
     if (teamTime == 0) {
         endRound();
-        update(roomRef, {
-            last: lastWord
-        });
     } else {
-        document.getElementById("cardTxt").innerHTML = cardsList[getNextCardInd()][(curNumberInd-1)%8];
+        curWord = cardsList[getNextCardInd()][(curNumberInd-1)%8];
+        update(roomRef, {
+            cur: curWord
+        });
+        document.getElementById("cardTxt").innerHTML = curWord;
         changeFontSize();
     }
 });
@@ -447,45 +599,56 @@ function endRound() {
     switch (currentTeam) {
         case 1:
             document.getElementById("teamCircle").style.backgroundColor = "#e31919";
+            document.getElementById("teamCircle").style.boxShadow = "0 0 5px #e31919aa";
             break;
         case 2:
             document.getElementById("teamCircle").style.backgroundColor = "#099d09";
+            document.getElementById("teamCircle").style.boxShadow = "0 0 5px #099d09aa";
             break;
         case 3:
             document.getElementById("teamCircle").style.backgroundColor = "#efa206";
+            document.getElementById("teamCircle").style.boxShadow = "0 0 5px #efa206aa";
             break;
         case 4:
             document.getElementById("teamCircle").style.backgroundColor = "#1616d2";
+            document.getElementById("teamCircle").style.boxShadow = "0 0 5px #1616d2aa";
             break;
         default:
             document.getElementById("teamCircle").style.backgroundColor = "#000";
+            document.getElementById("teamCircle").style.boxShadow = "0 0 5px #000000aa";
             break;
     }
     update(roomRef, {
-        newRound: true
+        newRound: true,
+        curTime: 60,
+        last: curWord,
+        team: teamToTxt(currentTeam)
     });
 }
 
-function taemToTxt(num) {
-    let teamTxt = "";
-    switch (num) {
+function updateTeamColor() {
+    switch (currentTeam) {
         case 1:
-            teamTxt = "player-red";
+            document.getElementById("teamCircle").style.backgroundColor = "#e31919";
+            document.getElementById("teamCircle").style.boxShadow = "0 0 5px #e31919aa";
             break;
         case 2:
-            teamTxt = "player-green";
+            document.getElementById("teamCircle").style.backgroundColor = "#099d09";
+            document.getElementById("teamCircle").style.boxShadow = "0 0 5px #099d09aa";
             break;
         case 3:
-            teamTxt = "player-orange";
+            document.getElementById("teamCircle").style.backgroundColor = "#efa206";
+            document.getElementById("teamCircle").style.boxShadow = "0 0 5px #efa206aa";
             break;
         case 4:
-            teamTxt = "player-blue";
+            document.getElementById("teamCircle").style.backgroundColor = "#1616d2";
+            document.getElementById("teamCircle").style.boxShadow = "0 0 5px #1616d2aa";
             break;
         default:
-            teamTxt = "player-red";
+            document.getElementById("teamCircle").style.backgroundColor = "#000";
+            document.getElementById("teamCircle").style.boxShadow = "0 0 5px #000000aa";
             break;
     }
-    return teamTxt;
 }
 
 let teamTxtHeb = "";
@@ -527,9 +690,13 @@ document.getElementById("rightBtn").addEventListener("click", function() {
         document.getElementById("winningMessageColor").style.color = teamTxtColor;
         document.getElementById("endSec").classList.add("show");
     } else {
-        sendTeam(taemToTxt(currentTeam));
-        sendScore(teamsScore[currentTeam-1]);
-        document.getElementById("cardTxt").innerHTML = cardsList[getNextCardInd()][(curNumberInd-1)%8];
+        sendTeam(teamToTxt(currentTeam));
+        sendScore(teamsScore[currentTeam-1], teamToTxt(currentTeam));
+        curWord = cardsList[getNextCardInd()][(curNumberInd-1)%8];
+        update(roomRef, {
+            cur: curWord
+        });
+        document.getElementById("cardTxt").innerHTML = curWord;
         changeFontSize();
     }
 });
@@ -539,24 +706,12 @@ document.getElementById("wrongBtn").addEventListener("click", function() {
     if (teamsScore[currentTeam-1] < 1) {
         teamsScore[currentTeam-1] = 1;
     }
-    sendTeam(taemToTxt(currentTeam));
-    sendScore(teamsScore[currentTeam-1]);
-    document.getElementById("cardTxt").innerHTML = cardsList[getNextCardInd()][(curNumberInd-1)%8];
+    sendTeam(teamToTxt(currentTeam));
+    sendScore(teamsScore[currentTeam-1], teamToTxt(currentTeam));
+    curWord = cardsList[getNextCardInd()][(curNumberInd-1)%8];
+    update(roomRef, {
+        cur: curWord
+    });
+    document.getElementById("cardTxt").innerHTML = curWord;
     changeFontSize();
 });
-
-const cardTxt = document.getElementById("cardTxt");
-const changeFontSize = () => {
-    const charCount = cardTxt.innerHTML.length;
-
-    let newSize = 100 / (charCount * 0.5);
-
-    if (newSize > 20) newSize = 20;
-    if (newSize < 5) newSize = 5;
-
-    cardTxt.style.fontSize = `${newSize}cqi`;
-};
-
-cardTxt.addEventListener("input", changeFontSize);
-window.addEventListener("resize", changeFontSize);
-changeFontSize();

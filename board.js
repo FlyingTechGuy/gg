@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-import { getDatabase, ref, get, push, onValue, update, onDisconnect } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+import { getDatabase, ref, get, push, remove, onValue, update, onDisconnect } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -27,6 +27,14 @@ const db = getDatabase(app);
 const gameRef = ref(db, 'game_session');
 let newRoomRef = '', roomId = '', gameLink = '';
 
+function onDisc() {
+    // update(newRoomRef, {
+    //     last: ""
+    // });
+    // deleteRoom(roomId);
+    // sendRestart();
+}
+
 function createRoom() {
     newRoomRef = push(gameRef);
     roomId = newRoomRef.key;
@@ -34,11 +42,16 @@ function createRoom() {
         col: "none",
         groups: 0,
         last: "",
+        cur: "",
         newRound: false,
         restart: false,
-        score: 0,
+        score1: 1,
+        score2: 1,
+        score3: 1,
+        score4: 1,
         team: "player-red",
         timer: false,
+        curTime: 60,
         win: "none",
         status: "waiting"
     });
@@ -58,14 +71,52 @@ function createRoom() {
         width: 256,
         height: 256
     });
-    document.getElementById("qrCodeUrl").innerHTML = gameLink;
+    // document.getElementById("qrCodeUrl").innerHTML = gameLink;
     document.getElementById("qrCodeUrl").addEventListener("click", function() {
+        jsMes();
+        navigator.clipboard.writeText(gameLink);
+    });
+    
+    new QRCode(document.getElementById("qrCodeImgBoxRe"), {
+        text: gameLink,
+        width: 256,
+        height: 256
+    });
+    // document.getElementById("qrCodeUrl").innerHTML = gameLink;
+    document.getElementById("qrCodeUrlRe").addEventListener("click", function() {
         jsMes();
         navigator.clipboard.writeText(gameLink);
     });
 }
 
 createRoom();
+
+function startPlaying(gnum) {
+    document.getElementById("startScreenCont").classList.add("hide");
+    console.log(gnum);
+    update(newRoomRef, {
+        groups: gnum
+    });
+}
+
+let groupNum = 0;
+window.addEventListener("DOMContentLoaded", async () => {
+    document.getElementById("startScreenBtn2").addEventListener("click", function() {
+        groupNum = 2;
+        startPlaying(groupNum);
+        document.getElementById("player-orange").style.display = "none";
+        document.getElementById("player-blue").style.display = "none";
+    });
+    document.getElementById("startScreenBtn3").addEventListener("click", function() {
+        groupNum = 3;
+        startPlaying(groupNum);
+        document.getElementById("player-blue").style.display = "none";
+    });
+    document.getElementById("startScreenBtn4").addEventListener("click", function() {
+        groupNum = 4;
+        startPlaying(groupNum);
+    });
+});
 
 let jsMesBool = true;
 function jsMes() {
@@ -77,35 +128,80 @@ function jsMes() {
     }
 }
 
+async function deleteRoom(roomIdX) {
+    if (!roomIdX) {
+        console.error("שגיאה: ניסיון למחוק חדר אך ה-roomIdX ריק!");
+        return;
+    }
+    const roomRef = ref(db, `game_session/${roomIdX}`);
+    try {
+        await remove(roomRef);
+        console.log(`החדר ${roomIdX} נמחק בהצלחה מ-Firebase!`);
+    } catch (error) {
+        console.error("שגיאה במחיקת החדר:", error);
+    }
+}
+
 // update(newRoomRef, {
 //     score: 0,
 //     team: "player-red",
 //     last: ""
 // });
 
+let statusBool = true;
 onValue(newRoomRef, (snapshot) => {
     const data = snapshot.val();
-    if (data && data.status !== undefined && data.status !== "waiting") {
+
+    if (data && data.status !== undefined && data.status === "Connected" && statusBool == true) {
         document.getElementById("qrCodeCont").classList.add("hide");
         document.getElementById("startScreenCont").classList.remove("hide");
-        update(newRoomRef, {
-            status: "waiting"
-        });
+        statusBool = false;
+        // update(newRoomRef, {
+        //     status: "waiting"
+        // });
+        console.log("if1");
     }
-});
+    
+    else if (data && data.status !== undefined && data.status === "Disconnected" && statusBool == false) {
+        // document.getElementById("qrCodeCont").classList.remove("hide");
+        // document.getElementById("startScreenCont").classList.add("hide");
+        // statusBool = true;
+        document.getElementById("qrCodeContRe").classList.remove("hide");
+        console.log("if2");
+    }
 
-onValue(newRoomRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data && data.score !== undefined && data.team !== undefined) {
+    else if (data && data.status !== undefined && data.status === "Connected" && statusBool == false) {
+        document.getElementById("qrCodeContRe").classList.add("hide");
+        console.log("if3");
+    }
+
+    if (data && data.score1 !== undefined && data.score2 !== undefined && data.score3 !== undefined && data.score4 !== undefined && data.team !== undefined) {
         // console.log("הניקוד התעדכן ל:", data.score, "עבור הקבוצה:", data.team);
+        switch (data.team) {
+            case "player-red":
+                // כאן אנחנו קוראים לפונקציה שכתבנו קודם כדי להזיז את החייל!
+                // console.log("red");
+                movePlayer(data.team, data.score1-1, 0); // Steps => 'player-red'
+                break;
+            case "player-green":
+                // כאן אנחנו קוראים לפונקציה שכתבנו קודם כדי להזיז את החייל!
+                // console.log("green");
+                movePlayer(data.team, data.score2-1, 0); // Steps => 'player-red'
+                break;
+            case "player-orange":
+                // כאן אנחנו קוראים לפונקציה שכתבנו קודם כדי להזיז את החייל!
+                // console.log("orange");
+                movePlayer(data.team, data.score3-1, 0); // Steps => 'player-red'
+                break;
+            case "player-blue":
+                // כאן אנחנו קוראים לפונקציה שכתבנו קודם כדי להזיז את החייל!
+                // console.log("blue");
+                movePlayer(data.team, data.score4-1, 0); // Steps => 'player-red'
+                break;
+        }
 
-        // כאן אנחנו קוראים לפונקציה שכתבנו קודם כדי להזיז את החייל!
-        movePlayer(data.team, data.score-1, 0); // Steps => 'player-red'
     }
-});
-
-onValue(newRoomRef, (snapshot) => {
-    const data = snapshot.val();
+    
     if (data && data.win !== undefined && data.win !== "none" && data.col !== undefined && data.col !== "none") {
         document.getElementById("winningMessageColor").innerHTML = data.win;
         document.getElementById("winningMessageColor").style.color = data.col;
@@ -115,72 +211,55 @@ onValue(newRoomRef, (snapshot) => {
             col: "none"
         });
     }
-});
 
-onValue(newRoomRef, (snapshot) => {
-    const data = snapshot.val();
     if (data && data.last !== undefined && data.last !== "none") {
         document.getElementById("lastWordTxt").innerHTML = data.last;
     }
-});
-
-onValue(newRoomRef, (snapshot) => {
-    const data = snapshot.val();
+    
     if (data && data.timer !== undefined && data.timer === true) {
-        startTimer();
-        update(newRoomRef, {
-            timer: false
-        });
+        // startTimer();
+        // update(newRoomRef, {
+        //     timer: false
+        // });
     }
-});
-
-onValue(newRoomRef, (snapshot) => {
-    const data = snapshot.val();
+    
     if (data && data.newRound !== undefined && data.newRound === true) {
-        teamTime = 60;
-        document.getElementById("topTimerTxt").innerHTML = teamTime;
-        update(newRoomRef, {
-            newRound: false
-        });
+        // teamTime = 60;
+        // document.getElementById("topTimerTxt").innerHTML = teamTime;
+        // update(newRoomRef, {
+        //     newRound: false
+        // });
+    }
+    
+    if (data && data.status !== undefined && data.status === "Disconnected") {
+        // 
     }
 });
 
-function startPlaying(gnum) {
-    document.getElementById("startScreenCont").classList.add("hide");
-    update(newRoomRef, {
-        groups: gnum
-    });
-}
+// let teamTime = 60;
+// let timer;
+// function startTimer() {
+//     timer = setInterval(function() {
+//         teamTime-=1;
+//         if (teamTime <= 0) {
+//             teamTime = 0;
+//             clearInterval(timer);
+//         }
+//         document.getElementById("topTimerTxt").innerHTML = teamTime.toString().padStart(2, '0');
+//     }, 1000);
+// }
 
-let groupNum = 0;
-document.getElementById("startScreenBtn2").addEventListener("click", function() {
-    groupNum = 2;
-    startPlaying(groupNum);
-    document.getElementById("player-orange").style.display = "none";
-    document.getElementById("player-blue").style.display = "none";
-});
-document.getElementById("startScreenBtn3").addEventListener("click", function() {
-    groupNum = 3;
-    startPlaying(groupNum);
-    document.getElementById("player-blue").style.display = "none";
-});
-document.getElementById("startScreenBtn4").addEventListener("click", function() {
-    groupNum = 4;
-    startPlaying(groupNum);
-});
-
-let teamTime = 60;
-let timer;
-function startTimer() {
-    timer = setInterval(function() {
-        teamTime-=1;
-        if (teamTime <= 0) {
-            teamTime = 0;
-            clearInterval(timer);
-        }
+let teamTime;
+const timerRef = ref(db, `game_session/${roomId}/curTime`);
+onValue(timerRef, (snapshot) => {
+    const timerData = snapshot.val();
+    console.log(timerData + " start");
+    if (timerData !== undefined) {
+        console.log(timerData);
+        teamTime = timerData;
         document.getElementById("topTimerTxt").innerHTML = teamTime.toString().padStart(2, '0');
-    }, 1000);
-}
+    }
+});
 
 function sendRestart() {
     update(newRoomRef, {
@@ -193,6 +272,7 @@ document.getElementById("restartBtn").addEventListener("click", function() {
         update(newRoomRef, {
             last: ""
         });
+        deleteRoom(roomId);
         sendRestart();
         window.location.reload();
     }
@@ -205,8 +285,8 @@ document.getElementById("winningMessageBtn").addEventListener("click", function(
 
 const board = document.getElementById('boardStation');
 const stations = [];
-const rows = 6;      // מספר שורות
-const cols = 8;      // מספר עמודות בכל שורה
+const rows = 6;       // מספר שורות
+const cols = 8;       // מספר עמודות בכל שורה
 const spacingX = 100; // מרחק אופקי בין עיגולים
 const spacingY = 100; // מרחק אנכי בין שורות
 
@@ -257,7 +337,7 @@ function addStation(row, col, index) {
     }
     
     // מספר מ-1 עד 8
-    station.innerText = (index % 8) + 1;
+    station.innerHTML = `<span>${(index % 8) + 1}</span>`;
     
     // חישוב מיקום פיזי
     const xPos = col * spacingX + 40;
